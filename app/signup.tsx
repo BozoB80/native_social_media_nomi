@@ -1,12 +1,5 @@
 import ScreenWrapper from "@/components/ScreenWrapper";
-import {
-  Alert,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import Icon from "@/assets/icons";
 import { StatusBar } from "expo-status-bar";
 import BackButton from "@/components/BackButton";
@@ -43,16 +36,14 @@ const SignUp = () => {
     } = await supabase.auth.signUp({
       email,
       password,
-      // options: {
-      //   data: {
-      //     name,
-      //   },
-      // },
+      options: {
+        data: {
+          name,
+        },
+      },
     });
-    setLoading(false);
 
-    console.log("session:", session);
-    console.log("error:", error);
+    setLoading(false);
 
     if (error) {
       Alert.alert("Sign up:", error.message);
