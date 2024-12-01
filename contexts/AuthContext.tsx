@@ -1,7 +1,8 @@
+import { Tables } from "@/helpers/types";
 import { createContext, useState, ReactNode, useContext } from "react";
 
 interface AuthContextType {
-  user: any;
+  user: Tables<"users"> | null;
   setAuth: (authUser: any) => void;
   setUserData: (userData: any) => void;
 }

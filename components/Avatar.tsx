@@ -5,10 +5,10 @@ import { theme } from "@/constants/theme";
 import { getUserImageSrc } from "@/services/imageService";
 
 type AvatarProps = {
-  uri: string;
+  uri?: string | null;
   size?: number;
   rounded: number;
-  style: any;
+  style?: any;
 };
 
 const Avatar = ({

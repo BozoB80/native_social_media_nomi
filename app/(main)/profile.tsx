@@ -1,20 +1,38 @@
-import { StyleSheet, Touchable, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useAuth } from "@/contexts/AuthContext";
 import { Router, useRouter } from "expo-router";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import Header from "@/components/Header";
-import { User } from "@supabase/supabase-js";
 import { hp, wp } from "@/helpers/common";
 import Icon from "@/assets/icons";
 import { theme } from "@/constants/theme";
+import { supabase } from "@/lib/supabase";
+import Avatar from "@/components/Avatar";
+import { Tables } from "@/database.types";
 
 const Profile = () => {
   const { user, setAuth } = useAuth();
   const router = useRouter();
 
+  const onLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      Alert.alert("Signout", "Error signing out");
+    }
+  };
+
   const handleLogout = async () => {
-    // setAuth(null);
-    // router.push("/login");
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: () => onLogout(),
+      },
+    ]);
   };
 
   return (
@@ -25,7 +43,7 @@ const Profile = () => {
 };
 
 type UserHeaderProps = {
-  user: User;
+  user: Tables<"users"> | null;
   router: Router;
   handleLogout: () => void;
 };
@@ -40,6 +58,17 @@ const UserHeader = ({ user, router, handleLogout }: UserHeaderProps) => {
         <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
           <Icon name="logout" color={theme.colors.rose} />
         </TouchableOpacity>
+      </View>
+      <View style={styles.headerContainer}>
+        <View style={{ gap: 15 }}>
+          <View style={styles.avatarContainer}>
+            <Avatar
+              uri={user?.image}
+              size={hp(12)}
+              rounded={theme.radius.xxl * 1.4}
+            />
+          </View>
+        </View>
       </View>
     </View>
   );
