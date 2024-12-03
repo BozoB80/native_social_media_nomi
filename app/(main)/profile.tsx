@@ -1,4 +1,11 @@
-import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useAuth } from "@/contexts/AuthContext";
 import { Router, useRouter } from "expo-router";
 import ScreenWrapper from "@/components/ScreenWrapper";
@@ -54,9 +61,9 @@ const UserHeader = ({ user, router, handleLogout }: UserHeaderProps) => {
       style={{ flex: 1, backgroundColor: "white", paddingHorizontal: wp(4) }}
     >
       <View>
-        <Header title="Profile" showBackButton />
+        <Header title="Profile" mb={30} />
         <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <Icon name="logout" color={theme.colors.rose} />
+          <Icon name="logout" color={theme.colors.rose} size={26} />
         </TouchableOpacity>
       </View>
       <View style={styles.headerContainer}>
@@ -67,6 +74,33 @@ const UserHeader = ({ user, router, handleLogout }: UserHeaderProps) => {
               size={hp(12)}
               rounded={theme.radius.xxl * 1.4}
             />
+            <Pressable
+              onPress={() => router.push("/editProfile")}
+              style={styles.editIcon}
+            >
+              <Icon name="edit" size={20} />
+            </Pressable>
+          </View>
+
+          <View style={{ alignItems: "center", gap: 4 }}>
+            <Text style={styles.userName}>{user && user.name}</Text>
+            <Text style={styles.infoText}>New York</Text>
+          </View>
+
+          <View style={{ gap: 10 }}>
+            <View style={styles.info}>
+              <Icon name="mail" size={20} color={theme.colors.textLight} />
+              <Text style={styles.infoText}>{user && user?.email}</Text>
+            </View>
+            {user && user.phoneNumber && (
+              <View style={styles.info}>
+                <Icon name="call" size={20} color={theme.colors.textLight} />
+                <Text style={styles.infoText}>{user && user?.phoneNumber}</Text>
+              </View>
+            )}
+            {user && user.bio && (
+              <Text style={styles.infoText}>{user.bio}</Text>
+            )}
           </View>
         </View>
       </View>

@@ -160,24 +160,30 @@ export type Database = {
       }
       users: {
         Row: {
+          address: string | null
           bio: string | null
           created_at: string
+          email: string | null
           id: string
           image: string | null
           name: string | null
           phoneNumber: string | null
         }
         Insert: {
+          address?: string | null
           bio?: string | null
           created_at?: string
+          email?: string | null
           id?: string
           image?: string | null
           name?: string | null
           phoneNumber?: string | null
         }
         Update: {
+          address?: string | null
           bio?: string | null
           created_at?: string
+          email?: string | null
           id?: string
           image?: string | null
           name?: string | null

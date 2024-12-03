@@ -10,7 +10,7 @@ type HeaderProps = {
   mb?: number;
 };
 
-const Header = ({ title, showBackButton = false, mb = 10 }: HeaderProps) => {
+const Header = ({ title, showBackButton = true, mb = 10 }: HeaderProps) => {
   const router = useRouter();
 
   return (
@@ -32,8 +32,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 5,
     gap: 10,
+    height: hp(3.8),
   },
   backButton: {
     position: "absolute",
