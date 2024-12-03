@@ -13,7 +13,7 @@ import { hp, wp } from "@/helpers/common";
 import Header from "@/components/Header";
 import { Image } from "expo-image";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUserImageSrc } from "@/services/imageService";
+import { getUserImageSrc, uploadFile } from "@/services/imageService";
 import Icon from "@/assets/icons";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
@@ -33,7 +33,7 @@ const EditProfile = () => {
   const [user, setUser] = useState({
     name: "",
     phoneNumber: "",
-    image: "" as string | null,
+    image: "" as string | null | ImagePicker.ImagePickerAsset,
     bio: "",
     address: "",
   });
@@ -50,31 +50,56 @@ const EditProfile = () => {
     }
   }, [currentUser]);
 
-  let imageSource = getUserImageSrc(currentUser?.image);
+  let imageSource =
+    user.image && typeof user.image === "object" && "uri" in user.image
+      ? (user.image as { uri: string }).uri
+      : getUserImageSrc(currentUser?.image);
 
   const onPickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
+      aspect: [4, 3],
       quality: 0.7,
     });
+
+    if (!result.canceled) {
+      setUser({ ...user, image: result.assets[0] });
+    }
   };
 
   const onSubmit = async () => {
     let userData = { ...user };
     let { address, bio, image, name, phoneNumber } = userData;
-    if (!name || !phoneNumber || !address || !bio) {
+    if (!name || !phoneNumber || !address || !bio || !image) {
       Alert.alert("Profile", "Please enter all the fields");
       return;
     }
     setLoading(true);
 
-    const res = await updateUser(currentUser?.id, userData);
+    const updateData = {
+      name,
+      phoneNumber,
+      address,
+      bio,
+      image: typeof image === "string" ? image : null,
+    };
+
+    if (typeof image === "object") {
+      let imageRes = await uploadFile("profiles", image?.uri, true);
+      if (imageRes.success && imageRes.data) {
+        updateData.image = imageRes.data;
+      } else {
+        updateData.image = null;
+      }
+    }
+
+    const res = await updateUser(currentUser?.id, updateData);
 
     setLoading(false);
 
     if (res.success) {
-      setUserData({ ...currentUser, ...userData });
+      setUserData({ ...currentUser, ...updateData });
       router.back();
     }
   };
@@ -192,8 +217,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(4),
   },
   bio: {
-    fontSize: hp(2),
-    textAlign: "center",
-    color: theme.colors.text,
+    flexDirection: "row",
+    height: hp(10),
+    alignItems: "flex-start",
+    paddingVertical: 10,
   },
 });
