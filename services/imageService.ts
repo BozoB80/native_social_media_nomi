@@ -14,13 +14,30 @@ export const getUserImageSrc = (imagePath?: string | null) => {
 
 export const getSupabaseFileUrl = (filepath: string) => {
   if (filepath) {
-    return {
-      uri: `${supabaseUrl}/storage/v1/object/public/uploads/${filepath}`,
-    };
+    return `${supabaseUrl}/storage/v1/object/public/uploads/${filepath}`    
   } else {
     return null;
   }
 };
+
+
+export const downloadFile = async (url: string): Promise<string | null> => {
+  try {
+    const {uri} = await FileSystem.downloadAsync(url, getLocalFilePath(url));
+    return uri;    
+  } catch (error) {
+    return null
+  }
+};
+
+
+export const getLocalFilePath = (filePath: string) => {
+  let fileName = filePath.split("/").pop();
+  return `${FileSystem.documentDirectory}${fileName}`;
+};
+
+
+
 export const uploadFile = async (
   folderName: string,
   fileUri: string,
@@ -47,8 +64,6 @@ export const uploadFile = async (
         msg: "Could not upload media",
       };
     }
-
-    console.log("data: ", data);
 
     return { success: true, data: data?.path };
   } catch (error) {

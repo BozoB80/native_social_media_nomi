@@ -1,4 +1,6 @@
 import {
+  Alert,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,11 +21,14 @@ import Button from "@/components/Button";
 import * as ImagePicker from "expo-image-picker";
 import { Image } from "expo-image";
 import { getSupabaseFileUrl } from "@/services/imageService";
+import { ResizeMode, Video } from "expo-av";
+import { createOrUpdatePost } from "@/services/postService";
+import { RichEditor } from "react-native-pell-rich-editor";
 
 const NewPost = () => {
   const { user } = useAuth();
   const bodyRef = useRef("");
-  const editorRef = useRef(null);
+  const editorRef = useRef<RichEditor>(null);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<ImagePicker.ImagePickerAsset | null>(null);
@@ -32,7 +37,7 @@ const NewPost = () => {
     let mediaConfig: ImagePicker.ImagePickerOptions = {
       mediaTypes: ["images"],
       allowsEditing: true,
-      aspect: [4, 3] as [number, number],
+      aspect: [1, 1] as [number, number],
       quality: 0.7,
     };
 
@@ -40,7 +45,7 @@ const NewPost = () => {
       mediaConfig = {
         mediaTypes: ["videos"],
         allowsEditing: true,
-        aspect: [4, 3] as [number, number],
+        aspect: [1, 1] as [number, number],
         quality: 0.7,
       };
     }
@@ -68,32 +73,58 @@ const NewPost = () => {
     if (!file) {
       return null;
     }
-
     if (isLocalFile(file)) {
       return file.type;
     }
-
     // check image or video for remote file
-    if (file.type?.includes("postImage")) {
+    if (file.type?.includes("postImages")) {
       return "image";
     }
 
     return "video";
   };
 
-  const getFileUri = (file: ImagePicker.ImagePickerAsset) => {
+  const getFileUri = (file: ImagePicker.ImagePickerAsset): string => {
     if (!file) {
-      return null;
+      return "";
     }
-
     if (isLocalFile(file)) {
       return file.uri;
     }
-
-    return getSupabaseFileUrl(file as unknown as string)?.uri;
+    return getSupabaseFileUrl(file as unknown as string)?.uri ?? "";
   };
 
-  const onSubmit = async () => {};
+  const onSubmit = async () => {
+    if (!bodyRef.current && !file) {
+      Alert.alert("Please add some text or an image to your post");
+      return;
+    }
+
+     // Transform the file object to match FileUpload type
+     const transformedFile = file ? {
+      type: file.type === "video" ? "video" : "image",
+      uri: file.uri
+    } : null;
+
+    const data = {
+      file: transformedFile,
+      body: bodyRef.current,
+      userId: user?.id,
+    };
+
+    setLoading(true);
+    let res = await createOrUpdatePost(data);
+    setLoading(false);
+
+    if (res.success) {
+      setFile(null);
+      bodyRef.current = "";
+      editorRef.current?.setContentHTML("")
+      router.back();
+    } else {
+      Alert.alert("Post was not created");
+    }
+  };
 
   return (
     <ScreenWrapper bg="white">
@@ -122,10 +153,19 @@ const NewPost = () => {
           {file && (
             <View style={styles.file}>
               {getFileType(file) == "video" ? (
-                <></>
+                <Video
+                  style={{ flex: 1 }}
+                  source={{ uri: getFileUri(file) }}
+                  useNativeControls
+                  resizeMode={ResizeMode.CONTAIN}
+                  isLooping
+                />
               ) : (
                 <Image source={{ uri: getFileUri(file) }} style={{ flex: 1 }} />
               )}
+              <Pressable onPress={() => setFile(null)} style={styles.closeIcon}>
+                <Icon name="delete" size={20} color="white" />
+              </Pressable>
             </View>
           )}
 
@@ -232,5 +272,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 10,
     right: 10,
+    padding: 7,
+    borderRadius: 50,
+    backgroundColor: "rgba(255,0,0,0.6)",
   },
 });
