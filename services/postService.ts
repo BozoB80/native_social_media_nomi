@@ -1,4 +1,4 @@
-import { UpdateTables } from "@/helpers/types";
+import { InsertTables, UpdateTables } from "@/helpers/types";
 import { uploadFile } from "./imageService";
 import { supabase } from "@/lib/supabase";
 
@@ -53,7 +53,8 @@ export const fetchPosts = async (limit=10) => {
       .select(`
         *, 
         user: users(id, name, image),
-        postLikes(*)
+        postLikes(*),
+        comments(count)
       `)
       .order("created_at", { ascending: false })
       .limit(limit)
@@ -113,5 +114,76 @@ export const removePostLike = async (postId: number, userId: string) => {
   } catch (error) {
     console.log("postLike error: ", error);
     return {success: false, msg: "Could not remove the like"}
+  }
+};
+
+
+export const fetchPostDetails = async (postId: number) => {
+  try {
+    const { data, error } = await supabase
+      .from("posts")
+      .select(`
+        *, 
+        user: users(id, name, image),
+        postLikes(*),
+        comments(*, user: users(id, name, image))
+      `)
+      .eq("id", postId)
+      .order("created_at", { ascending: false, referencedTable: "comments" })
+      .single()
+
+    if (error) {
+      console.log("fetch posts details error: ", error);
+      return {success: false, msg: "Could not create the post"}
+    }
+
+    return {success: true, data: data}    
+
+  } catch (error) {
+    console.log("fetch posts details error: ", error);
+    return {success: false, msg: "Could not create the post"}
+  }
+};
+
+
+export const createComment = async (comment: InsertTables<"comments">) => {
+  try {
+    const { data, error } = await supabase
+    .from("comments")
+    .insert(comment)
+    .select()
+    .single()      
+
+    if (error) {
+      console.log("comment error: ", error);
+      return {success: false, msg: "Could not create the comment"}
+    }
+
+    return {success: true, data: data}    
+
+  } catch (error) {
+    console.log("comment error: ", error);
+    return {success: false, msg: "Could not create the comment"}
+  }
+};
+
+
+export const removeComment = async (commentId: number) => {
+  try {
+    const { error } = await supabase
+    .from("comments")
+    .delete()
+    .eq("id", commentId)
+
+    if (error) {
+      console.log("remove comment error: ", error);
+      return {success: false, msg: "Could not remove the comment"}
+    }
+
+    return {success: true, data: {commentId}}    
+
+  } catch (error) {
+    console.log("remove comment error: ", error);
+    return {success: false, msg: "Could not remove the comment"}
   }
 };

@@ -7,7 +7,7 @@ import { getUserImageSrc } from "@/services/imageService";
 type AvatarProps = {
   uri?: string | null;
   size?: number;
-  rounded: number;
+  rounded?: number;
   style?: any;
 };
 

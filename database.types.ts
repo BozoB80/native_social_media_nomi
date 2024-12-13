@@ -16,6 +16,7 @@ export type Database = {
           postId: number | null
           text: string | null
           userId: string | null
+          count: number | null
         }
         Insert: {
           created_at?: string
@@ -23,6 +24,7 @@ export type Database = {
           postId?: number | null
           text?: string | null
           userId?: string | null
+          count: number | null
         }
         Update: {
           created_at?: string
@@ -30,6 +32,7 @@ export type Database = {
           postId?: number | null
           text?: string | null
           userId?: string | null
+          count: number | null
         }
         Relationships: [
           {

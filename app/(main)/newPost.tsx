@@ -100,8 +100,8 @@ const NewPost = () => {
       return;
     }
 
-     // Transform the file object to match FileUpload type
-     const transformedFile = file ? {
+    // Transform the file object to match FileUpload type
+    const transformedFile = file ? {
       type: file.type === "video" ? "video" : "image",
       uri: file.uri
     } : null;

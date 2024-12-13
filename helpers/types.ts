@@ -7,7 +7,7 @@ export type InsertTables<T extends keyof Database["public"]["Tables"]> =
 export type UpdateTables<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Update"];
 export type Enums<T extends keyof Database["public"]["Enums"]> =
-  Database["public"]["Enums"][T];
+  Database["public"]["Enums"][T]; 
 
  export type PostWithUserAndPostLikes = Tables<"posts"> & {
     user: {
@@ -16,4 +16,5 @@ export type Enums<T extends keyof Database["public"]["Enums"]> =
       image: string | null;
     } | null;
     postLikes: Tables<"postLikes">[];
+    comments: Tables<"comments">[];
   };
